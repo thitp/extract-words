@@ -6,22 +6,6 @@ packages:
       commit: a663c6e12e591fa6125dee06546613585fe2d6ce
     extra-dep: true
 extra-deps:
-  - aeson-1.0.2.1
-  - connection-0.2.7
-  - configurator-ng-0.0.0.1
-  - critbit-0.2.0.0
-  - highjson-0.4.0.0
-  - highjson-swagger-0.4.0.0
-  - highjson-th-0.4.0.0
-  - http-api-data-0.3.3
-  - hvect-0.4.0.0
-  - insert-ordered-containers-0.2.0.0
-  - servant-0.9.1.1
-  - servant-server-0.9.1.1
-  - simple-logger-0.0.3
-  - swagger2-2.1.3
-  - text-utils-0.1.0.0
-  - timespan-0.3.0.0
   - mecab-0.4.0
 extra-lib-dirs:
   - /usr/local/lib

@@ -1,0 +1,17 @@
+dependencies:
+  cache_directories:
+    - "~/.stack"
+    - ".stack-work"
+  pre:
+    - wget https://github.com/commercialhaskell/stack/releases/download/v1.2.0/stack-1.2.0-linux-x86_64.tar.gz -O /tmp/stack.tar.gz
+    - tar -C /tmp -xvf /tmp/stack.tar.gz && chmod +x /tmp/stack-1.2.0-linux-x86_64/stack
+    - sudo mv /tmp/stack-1.2.0-linux-x86_64/stack /usr/bin/stack
+    -  sudo apt-get update && sudo apt-get install -y mecab mecab-ipadic-utf8 libmecab-dev
+  override:
+    - stack setup
+    - stack install cpphs
+    - stack build --test --bench --only-dependencies
+
+test:
+  override:
+    - stack test --bench --pedantic --no-run-benchmarks

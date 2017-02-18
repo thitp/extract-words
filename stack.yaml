@@ -5,8 +5,6 @@ packages:
       git: https://github.com/thitp/hsmecab.git
       commit: a663c6e12e591fa6125dee06546613585fe2d6ce
     extra-dep: true
-extra-deps:
-  - mecab-0.4.0
 extra-lib-dirs:
   - /usr/local/lib
 extra-include-dirs:

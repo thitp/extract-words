@@ -1,3 +1,3 @@
 # Extract words from text
 
-Buildstatus: unknown
+Buildstatus: [![CircleCI](https://circleci.com/gh/thitp/extract-words.svg?style=svg)](https://circleci.com/gh/thitp/extract-words)

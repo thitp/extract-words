@@ -1,7 +1,7 @@
 {-# LANGUAGE ViewPatterns #-}
 module Data.Text.Words
     ( cleanNumbersAndPunctiation
-    , extractWords, extractWords'
+    , extractWords, extractWords', ExtractInfo(..)
     , containsJapanese
     )
 where
@@ -31,6 +31,7 @@ extractWords = snd . extractWords'
 
 data ExtractInfo
     = EContainsJapanese
+    deriving (Show, Eq)
 
 -- | Given a text, extract all words and provides additional information
 -- found during extraction

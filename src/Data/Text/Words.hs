@@ -1,13 +1,14 @@
+{-# LANGUAGE ViewPatterns #-}
 module Data.Text.Words
     ( cleanNumbersAndPunctiation
-    , extractWords
+    , extractWords, extractWords'
     )
 where
 
 import Data.Char
 import System.IO.Unsafe
-import qualified Data.Set as S
 import qualified Data.Text as T
+import qualified Data.Vector as V
 import qualified Text.MeCab as MC
 
 mcHandle :: MC.MeCab
@@ -18,31 +19,55 @@ mcHandle =
 mcParse :: T.Text -> [MC.Node T.Text]
 mcParse x = unsafePerformIO $ MC.parseToNodes mcHandle x
 
-japWords :: T.Text -> [T.Text]
+japWords :: T.Text -> V.Vector T.Text
 japWords =
-    map MC.nodeSurface . filter ((\x -> x == MC.NOR || x == MC.UNK) . MC.nodeStat) . mcParse
+    V.map MC.nodeSurface . V.filter ((\x -> x == MC.NOR || x == MC.UNK) . MC.nodeStat)
+    . V.fromList . mcParse
 
 -- | Given a text, extract all words. Also supports japanese input
-extractWords :: T.Text -> [T.Text]
-extractWords t =
-    let cleaned = T.stripStart $ cleanNumbersAndPunctiation t
-    in if isJapanese (T.take 1000 cleaned)
-          then japWords cleaned
-          else filter (not . T.null) . map (T.toLower . T.strip) . T.words $ cleaned
+extractWords :: T.Text -> V.Vector T.Text
+extractWords = snd . extractWords'
 
-isJapanese :: T.Text -> Bool
-isJapanese =
+data ExtractInfo
+    = EContainsJapanese
+
+-- | Given a text, extract all words and provides additional information
+-- found during extraction
+extractWords' :: T.Text -> ([ExtractInfo], V.Vector T.Text)
+extractWords' t =
+    let cleaned = T.stripStart $ cleanNumbersAndPunctiation t
+        hasJp = containsJapanese cleaned
+        wrds =
+            if hasJp
+            then japWords cleaned
+            else V.filter (not . T.null) . V.map (T.toLower . T.strip) . V.fromList . T.words $ cleaned
+    in ( if hasJp then [EContainsJapanese] else []
+       , wrds
+       )
+
+
+containsJapanese :: T.Text -> Bool
+containsJapanese =
     loop
     where
-      jpIdents =
-          S.fromList
-          "をがはからでだすな漢字注釈出典関連項目"
       loop txt =
           case T.uncons txt of
             Just (c, rest)
-                | c `S.member` jpIdents -> True
+                | isJap c -> True
                 | otherwise -> loop rest
             Nothing -> False
+
+isJapPunct :: Char -> Bool
+isJapPunct (ord -> c) =
+    c >= 0x3000 && c <= 0x303f
+
+isJap :: Char -> Bool
+isJap o@(ord -> c) =
+    isJapPunct o
+    || (c >= 0x3040 && c <= 0x309f) -- hiragana
+    || (c >= 0x30a0 && c <= 0x30ff) -- katakana
+    || (c >= 0xff00 && c <= 0xffef) -- full width roman
+    || (c >= 0x4e00 && c <= 0x9faf) -- kanji
 
 -- | Replace all punctiation and numbers from input and replace with
 -- space
@@ -72,4 +97,5 @@ cleanNumbersAndPunctiation =
           | isNumber ch -> ' '
           | isPunctuation ch -> ' '
           | isSymbol ch -> ' '
+          | ord ch == 0x3000 -> ' ' -- full-width space
           | otherwise -> ch

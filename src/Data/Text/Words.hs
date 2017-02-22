@@ -2,6 +2,7 @@
 module Data.Text.Words
     ( cleanNumbersAndPunctiation
     , extractWords, extractWords'
+    , containsJapanese
     )
 where
 
@@ -45,7 +46,7 @@ extractWords' t =
        , wrds
        )
 
-
+-- | does the given text contain japanese charaters
 containsJapanese :: T.Text -> Bool
 containsJapanese =
     loop

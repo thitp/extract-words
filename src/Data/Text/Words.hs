@@ -2,6 +2,7 @@
 module Data.Text.Words
     ( cleanNumbersAndPunctiation
     , extractWords, extractWords', ExtractInfo(..)
+    , TextInfo(..)
     , containsJapanese
     )
 where
@@ -12,13 +13,11 @@ import qualified Data.Text as T
 import qualified Data.Vector as V
 import qualified Text.MeCab as MC
 
-mcHandle :: MC.MeCab
-mcHandle =
-    unsafePerformIO $ MC.new []
-{-# NOINLINE mcHandle #-}
-
 mcParse :: T.Text -> [MC.Node T.Text]
-mcParse x = unsafePerformIO $ MC.parseToNodes mcHandle x
+mcParse x =
+    unsafePerformIO $
+    do mcHandle <- MC.new []
+       MC.parseToNodes mcHandle x
 
 japWords :: T.Text -> V.Vector T.Text
 japWords =
@@ -26,19 +25,24 @@ japWords =
     . V.fromList . mcParse
 
 -- | Given a text, extract all words. Also supports japanese input
-extractWords :: T.Text -> V.Vector T.Text
-extractWords = snd . extractWords'
+extractWords :: TextInfo -> T.Text -> V.Vector T.Text
+extractWords ti = snd . extractWords' ti
 
 data ExtractInfo
     = EContainsJapanese
     deriving (Show, Eq)
 
+data TextInfo
+    = TiPossiblyJapanese
+    | TiNoJapanese
+    deriving (Show, Eq)
+
 -- | Given a text, extract all words and provides additional information
 -- found during extraction
-extractWords' :: T.Text -> ([ExtractInfo], V.Vector T.Text)
-extractWords' t =
+extractWords' :: TextInfo -> T.Text -> ([ExtractInfo], V.Vector T.Text)
+extractWords' ti t =
     let cleaned = T.stripStart $ cleanNumbersAndPunctiation t
-        hasJp = containsJapanese cleaned
+        hasJp = ti == TiPossiblyJapanese && containsJapanese cleaned
         wrds =
             if hasJp
             then japWords cleaned

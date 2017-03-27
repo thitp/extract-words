@@ -11,22 +11,22 @@ main =
     hspec $
     do describe "word splitting" $
            do it "should work for german" $
-                  extractWords' "Hallo, das ist ein deutscher Text." `shouldBe`
+                  extractWords' TiNoJapanese "Hallo, das ist ein deutscher Text." `shouldBe`
                   ( []
                   , V.fromList ["hallo", "das", "ist", "ein", "deutscher", "text"]
                   )
               it "should work for japanese" $
-                  extractWords' "これは、日本語のテキストです。" `shouldBe`
+                  extractWords' TiPossiblyJapanese "これは、日本語のテキストです。" `shouldBe`
                   ( [EContainsJapanese]
                   , V.fromList ["これ", "は", "日本語", "の", "テキスト", "です"]
                   )
               it "should work for mixed german and japanese texts" $
-                  extractWords' "Hallo mein Freund: これは、Ok 日本語のテキストです。" `shouldBe`
+                  extractWords' TiPossiblyJapanese "Hallo mein Freund: これは、Ok 日本語のテキストです。" `shouldBe`
                   ( [EContainsJapanese]
                   , V.fromList ["Hallo", "mein", "Freund", "これ", "は", "Ok", "日本語", "の", "テキスト", "です"]
                   )
               it "should work for mixed english and japanese" $
-                  extractWords' "曲げR or　曲げアール" `shouldBe`
+                  extractWords' TiPossiblyJapanese "曲げR or　曲げアール" `shouldBe`
                   ( [EContainsJapanese]
                   , V.fromList ["曲げ", "R", "or", "曲げ", "アール"]
                   )
